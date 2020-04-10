@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="igo">
+        <sql>
+            CREATE TABLE activity_type (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            name varchar(50) NOT NULL,
+            CONSTRAINT activity_type_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE activity_type;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2" author="igo">
+        <sql>
+            CREATE TABLE address (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            location_id bigint NOT NULL,
+            address_line1 varchar(50) NOT NULL,
+            address_line2 varchar(50) NOT NULL,
+            city varchar(25) NOT NULL,
+            state varchar(25) NOT NULL,
+            postcode int NOT NULL,
+            CONSTRAINT address_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE address;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="3" author="igo">
+        <sql>
+            CREATE TABLE event (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            location_id bigint NOT NULL,
+            activity_type_id bigint NOT NULL,
+            title varchar(50) NOT NULL,
+            description varchar(250) NOT NULL,
+            CONSTRAINT event_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE event;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="4" author="igo">
+        <sql>
+            CREATE TABLE event_task (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            event_id bigint NOT NULL,
+            title varchar(50) NOT NULL,
+            description varchar(250) NOT NULL,
+            start_time DATETIME NOT NULL,
+            end_time DATETIME NOT NULL,
+            CONSTRAINT event_task_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE event_task;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="5" author="igo">
+        <sql>
+            CREATE TABLE location (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            latitude decimal(10,8) NOT NULL,
+            longitude decimal(11,8) NOT NULL,
+            CONSTRAINT location_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE location;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="6" author="igo">
+        <sql>
+            CREATE TABLE task_user (
+            id bigint NOT NULL AUTO_INCREMENT,
+            event_task_id bigint NOT NULL,
+            user_id bigint NOT NULL,
+            CONSTRAINT task_user_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE task_user;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7" author="igo">
+        <sql>
+            CREATE TABLE user (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            username varchar(25) NOT NULL,
+            password varchar(255) NOT NULL,
+            email varchar(50),
+            name varchar(50) NOT NULL,
+            role varchar(50) NOT NULL,
+            CONSTRAINT user_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE user;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="8" author="igo">
+        <sql>
+            CREATE TABLE user_activity_type (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            user_id bigint NOT NULL,
+            activity_type_id bigint NOT NULL,
+            CONSTRAINT user_activity_type_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE user_activity_type;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="9" author="igo">
+        <sql>
+            CREATE TABLE user_event (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            user_id bigint NOT NULL,
+            event_id bigint NOT NULL,
+            start_time DATETIME NOT NULL,
+            end_time DATETIME NOT NULL,
+            CONSTRAINT user_event_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE user_event;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="10" author="igo">
+        <sql>
+            CREATE TABLE user_location (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            user_id bigint NOT NULL,
+            location_id bigint NOT NULL,
+            CONSTRAINT user_location_pk PRIMARY KEY (id)
+            );
+        </sql>
+        <rollback>
+            DROP TABLE user_location;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="11" author="igo">
+        <sql>
+            ALTER TABLE address ADD CONSTRAINT ADDRESS_LOCATION FOREIGN KEY (location_id)
+            REFERENCES location(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="12" author="igo">
+        <sql>
+            ALTER TABLE user_event ADD CONSTRAINT USER_EVENT_EVENT FOREIGN KEY (event_id)
+            REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="13" author="igo">
+        <sql>
+            ALTER TABLE user_event ADD CONSTRAINT USER_EVENT_USER FOREIGN KEY (user_id)
+            REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="14" author="igo">
+        <sql>
+            ALTER TABLE user_location ADD CONSTRAINT USER_LOCATION_LOCATION FOREIGN KEY (location_id)
+            REFERENCES location(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="15" author="igo">
+        <sql>
+            ALTER TABLE user_location ADD CONSTRAINT USER_LOCATION_USER FOREIGN KEY (user_id)
+            REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="16" author="igo">
+        <sql>
+            ALTER TABLE event ADD CONSTRAINT event_activity_type FOREIGN KEY (activity_type_id)
+            REFERENCES activity_type(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="17" author="igo">
+        <sql>
+            ALTER TABLE event ADD CONSTRAINT event_location FOREIGN KEY (location_id)
+            REFERENCES location(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="18" author="igo">
+        <sql>
+            ALTER TABLE event_task ADD CONSTRAINT event_task_event FOREIGN KEY (event_id)
+            REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="19" author="igo">
+        <sql>
+            ALTER TABLE user_activity_type ADD CONSTRAINT user_activity_type_activity_type FOREIGN KEY (activity_type_id)
+            REFERENCES activity_type(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="20" author="igo">
+        <sql>
+            ALTER TABLE user_activity_type ADD CONSTRAINT user_activity_type_user FOREIGN KEY (user_id)
+            REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="21" author="igo">
+        <sql>
+            ALTER TABLE task_user ADD CONSTRAINT user_task_event_task FOREIGN KEY (event_task_id)
+            REFERENCES event_task(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+
+    <changeSet id="22" author="igo">
+        <sql>
+            ALTER TABLE task_user ADD CONSTRAINT user_task_user FOREIGN KEY (user_id)
+            REFERENCES user(id) ON DELETE CASCADE ON UPDATE CASCADE;
+        </sql>
+    </changeSet>
+</databaseChangeLog>
