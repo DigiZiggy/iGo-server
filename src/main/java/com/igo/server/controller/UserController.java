@@ -18,6 +18,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 @RestController
+@RequestMapping("/api/v1")
 public class UserController {
 
     @Autowired
@@ -26,72 +27,43 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private EventService eventService;
-
-    @Autowired
-    private EventTaskService eventTaskService;
-
-    @PostMapping("/api/user/registration")
+    @PostMapping("/user/registration")
     public ResponseEntity<?> register(@RequestBody User user){
-        System.out.println("GETS TO REGISTRATION!!!!");
-
         if(userService.findByUsername(user.getUsername())!=null){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         user.setRole(Role.USER);
-        System.out.println("User ROLE set");
-        System.out.println(user.getRole());
         return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
-    @GetMapping("/api/user/login")
+    @GetMapping("/user/login")
     public ResponseEntity<?> getUser(Principal principal){
 		//principal = httpServletRequest.getUserPrincipal.
-        System.out.println("GET TO LOGIN: getUser()");
         if(principal == null){
-            System.out.println("principal is NULL");
             //logout will also use here so we should return ok http status.
             return ResponseEntity.ok(principal);
         }
-        System.out.println("principal:  " + principal);
-
         UsernamePasswordAuthenticationToken authenticationToken =
                 (UsernamePasswordAuthenticationToken) principal;
 
-        System.out.println("authenticationToken:  " + authenticationToken);
-
         User user = userService.findByUsername(authenticationToken.getName());
-        System.out.println("USER:  " + user.toString());
         user.setToken(tokenProvider.generateToken(authenticationToken));
-
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @PostMapping("/api/user/event-create")
-    public ResponseEntity<?> createEvent(@RequestBody Event event){
-        return new ResponseEntity<>(eventService.saveEvent(event), HttpStatus.CREATED);
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers(){
+        return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
     }
 
-    @PutMapping("/api/user/event-update")
-    public ResponseEntity<?> updateEvent(@RequestBody Event event){
-        return new ResponseEntity<>(eventService.updateEvent(event), HttpStatus.CREATED);
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id){
+        return new ResponseEntity<>(userService.findUserById(id), HttpStatus.OK);
     }
 
-    @DeleteMapping("/api/user/event-delete")
-    public ResponseEntity<?> deleteEvent(@RequestBody Event event){
-        eventService.deleteEvent(event.getId());
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/api/user/events")
-    public ResponseEntity<?> getAllEvents(){
-        return new ResponseEntity<>(eventService.findAllEvents(), HttpStatus.OK);
-    }
-
-    @PostMapping("/api/user/event/addTask")
-    public ResponseEntity<?> purchaseProduct(@RequestBody EventTask eventTask){
-        eventTaskService.saveEventTask(eventTask);
-        return new ResponseEntity<>(eventTask, HttpStatus.CREATED);
+    @GetMapping("/users/{userId}/events")
+    public ResponseEntity<?> getAllUserEvents(@PathVariable Long userId){
+        User user = userService.findUserById(userId);
+        return new ResponseEntity<>(user.getUserEvents(), HttpStatus.OK);
     }
 }

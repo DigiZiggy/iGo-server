@@ -14,6 +14,8 @@ public interface UserService {
 
     User findByUsername(String username);
 
+    User findUserById(Long id);
+
     List<User> findAllUsers();
 
     Long numberOfUsers();
